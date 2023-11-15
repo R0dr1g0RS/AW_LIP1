@@ -1,10 +1,11 @@
+import kotlin.system.exitProcess
 data class Context(val box: String, val type: String)
 
 fun t (terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<Context>?): String {
 
     if (indexFin >= indexIni) {
         //println(indexIni.toString() + " -> " + terms[indexIni])
-        return when (terms[indexIni]) {
+        var result = when (terms[indexIni]) {
             "true" -> tTrue(terms, indexIni, indexFin)
             "false" -> tFalse(terms, indexIni, indexFin)
             "if" -> {
@@ -44,10 +45,12 @@ fun tVar(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
             if(terms[indexIni] == context[i].box)
                 return context[i].type
         }
-        return "-"
+        println("-")
+        return exitProcess(0)
 
     } else {
-        return "-"
+        println("-")
+        return exitProcess(0)
     }
 }
 
@@ -111,11 +114,11 @@ fun tApl(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
             }
             "endif" -> {
                 val startU = findPairs(terms, indexFin - 1, indexIni + 1, "endif", "if")
-                tIf(terms, checkNotNull(startU), indexFin-1, context)
+                t(terms, checkNotNull(startU), indexFin-1, context)
             }
             "end" -> {
                 val startU = findPairs(terms, indexFin - 1, indexIni + 1, "end", "lambda")
-                tAbs(terms, checkNotNull(startU), indexFin-1, context)
+                t(terms, checkNotNull(startU), indexFin-1, context)
             }
             else -> {
                 //println(indexFin.toString()+" Apl" + terms[indexFin])
