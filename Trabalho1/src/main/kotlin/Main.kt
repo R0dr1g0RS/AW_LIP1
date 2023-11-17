@@ -101,10 +101,10 @@ fun tAbs(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
         return ("( $xU -> $t )")
 
     } catch (ex: NullPointerException) {
-        println("T_Abs - NullPointer Exception: ${ex.message}")
+        //println("T_Abs - NullPointer Exception: ${ex.message}")
         return ("!")
     } catch (ex: Exception) {
-        println("T_Abs - Another Exception: ${ex.message}")
+        //println("T_Abs - Another Exception: ${ex.message}")
         return ("!")
     }
 
@@ -155,7 +155,7 @@ fun tApl(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
         // Ex.: t = '( Nat -> Nat ) -> Nat' and u = '( Nat -> Nat )'
         // if t starts with '( Nat -> Nat )', then return '( Nat )', cutting out '( Nat -> Nat ) ->' and adding '( '
         if (t.startsWith(u.substring(0, u.length-1))){
-            println("...$t...$u...")
+            //println("...$t...$u...")
             val result = "( " + t.substring(u.length+4, t.length)
 
             if (result == "( Bool )")
@@ -169,10 +169,10 @@ fun tApl(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
         return "!"
 
     } catch (ex: NullPointerException) {
-        println("T_Apl - NullPointer Exception: ${ex.message}")
+        //println("T_Apl - NullPointer Exception: ${ex.message}")
         return ("!")
     } catch (ex: Exception) {
-        println("T_Apl - Another Exception: ${ex.message}")
+        //println("T_Apl - Another Exception: ${ex.message}")
         return ("!")
     }
 }
@@ -227,10 +227,10 @@ fun tIf(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<
         return "!"
 
     } catch (ex: NullPointerException) {
-        println("T_If - NullPointer Exception: ${ex.message}")
+        //println("T_If - NullPointer Exception: ${ex.message}")
         return ("!")
     } catch (ex: Exception) {
-        println("T_If - Another Exception: ${ex.message}")
+        //println("T_If - Another Exception: ${ex.message}")
         return ("!")
     }
 }
