@@ -17,9 +17,9 @@ fun t (terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<C
                 }
             }
 
-            "suc" -> tSuc()
-            "pred" -> tPred()
-            "ehzero" -> tEhzero()
+            "suc" -> tSuc(terms, indexIni, indexFin)
+            "pred" -> tPred(terms, indexIni, indexFin)
+            "ehzero" -> tEhzero(terms, indexIni, indexFin)
             "(" -> tApl(terms, indexIni, indexFin, context)
             "lambda" -> tAbs(terms, indexIni, indexFin, context)
             else ->
@@ -113,6 +113,7 @@ fun tAbs(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
 fun tApl(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<Context>?): String {
     val endParen = findPairs(terms, indexIni, indexFin, "(", ")")
     try {
+        //println(checkNotNull(endParen))
         val t = t(terms, indexIni+1, checkNotNull(endParen)-1, context)
         //println("Apl: "+ (indexIni+1).toString() + " - " + t)
         val u = when (terms[indexFin-1]){
@@ -186,16 +187,43 @@ fun tNat(terms: List<String>, indexIni: Int, indexFin: Int): String {
     return "!"
 }
 
-fun tEhzero(/*terms: List<String>, indexIni: Int, indexFin: Int*/): String {
-    return "( Nat -> Bool )"
+fun tEhzero(terms: List<String>, indexIni: Int, indexFin: Int): String {
+    if (indexFin == indexIni)
+        return "( Nat -> Nat )"
+    try {
+        if (terms[indexIni - 1] == "(")
+            return "( Nat -> Nat )"
+        return ("!")
+    } catch (ex: Exception) {
+        //println("T_Suc - Another Exception: ${ex.message}")
+        return ("!")
+    }
 }
 
-fun tPred(/*terms: List<String>, indexIni: Int, indexFin: Int*/): String {
-    return "( Nat -> Nat )"
+fun tPred(terms: List<String>, indexIni: Int, indexFin: Int): String {
+    if (indexFin == indexIni)
+        return "( Nat -> Nat )"
+    try {
+        if (terms[indexIni - 1] == "(")
+            return "( Nat -> Nat )"
+        return ("!")
+    } catch (ex: Exception) {
+        //println("T_Suc - Another Exception: ${ex.message}")
+        return ("!")
+    }
 }
 
-fun tSuc(/*terms: List<String>, indexIni: Int, indexFin: Int*/): String {
-    return "( Nat -> Nat )"
+fun tSuc(terms: List<String>, indexIni: Int, indexFin: Int): String {
+    if (indexFin == indexIni)
+        return "( Nat -> Nat )"
+    try {
+        if (terms[indexIni - 1] == "(")
+            return "( Nat -> Nat )"
+        return ("!")
+    } catch (ex: Exception) {
+        //println("T_Suc - Another Exception: ${ex.message}")
+        return ("!")
+    }
 }
 
 fun tTrue(indexIni: Int, indexFin: Int): String {
