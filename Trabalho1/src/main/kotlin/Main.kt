@@ -68,7 +68,7 @@ fun tAbs(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
         val endType = findPairs(terms, indexIni, indexFin, "lambda", ".")
         //println(endType)
         var xU = ""
-        for (i in indexIni+3..<checkNotNull(endType)) {
+        for (i in indexIni+3..(checkNotNull(endType)-1)) {
             //println(i)
 
             xU += terms[i]
