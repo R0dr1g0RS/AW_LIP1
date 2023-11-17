@@ -5,9 +5,9 @@ fun t (terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<C
 
     if (indexFin >= indexIni) {
         //println(indexIni.toString() + " -> " + terms[indexIni])
-        var result = when (terms[indexIni]) {
-            "true" -> tTrue(terms, indexIni, indexFin)
-            "false" -> tFalse(terms, indexIni, indexFin)
+        val result = when (terms[indexIni]) {
+            "true" -> tTrue(indexIni, indexFin)
+            "false" -> tFalse(indexIni, indexFin)
             "if" -> {
                 val endif = findPairs(terms, indexIni, indexFin, "if", "endif")
                 if (endif != null) {
@@ -17,9 +17,9 @@ fun t (terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<C
                 }
             }
 
-            "suc" -> tSuc(terms, indexIni, indexFin)
-            "pred" -> tPred(terms, indexIni, indexFin)
-            "ehzero" -> tEhzero(terms, indexIni, indexFin)
+            "suc" -> tSuc()
+            "pred" -> tPred()
+            "ehzero" -> tEhzero()
             "(" -> tApl(terms, indexIni, indexFin, context)
             "lambda" -> tAbs(terms, indexIni, indexFin, context)
             else ->
@@ -28,15 +28,21 @@ fun t (terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<C
                 } else {
                     //println("pingVar")
                     //println(indexIni.toString() + "_" + terms[indexIni])
-                    tVar(terms, indexIni, indexFin, context)
+                    tVar(terms, indexIni, context)
                 }
         }
+        if (result == "!") {
+            println("!")
+            @Suppress("UNREACHABLE_CODE")
+            return exitProcess(0)
+        }
+        return (result)
     }
     //println(indexIni.toString() + "_" + terms[indexIni])
-    return ("!");
+    return ("!")
 }
 
-fun tVar(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<Context>?): String {
+fun tVar(terms: List<String>, indexIni: Int, context: MutableList<Context>?): String {
     if (context != null) {
         //println("CONTEXTO:")
         for (i in context.size-1 downTo 0 ) {
@@ -46,10 +52,12 @@ fun tVar(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
                 return context[i].type
         }
         println("-")
+        @Suppress("UNREACHABLE_CODE")
         return exitProcess(0)
 
     } else {
         println("-")
+        @Suppress("UNREACHABLE_CODE")
         return exitProcess(0)
     }
 }
@@ -68,6 +76,7 @@ fun tAbs(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
         val endType = findPairs(terms, indexIni, indexFin, "lambda", ".")
         //println(endType)
         var xU = ""
+
         for (i in indexIni+3..(checkNotNull(endType)-1)) {
             //println(i)
 
@@ -102,7 +111,6 @@ fun tAbs(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
 }
 
 fun tApl(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<Context>?): String {
-    //println("pingApl")
     val endParen = findPairs(terms, indexIni, indexFin, "(", ")")
     try {
         val t = t(terms, indexIni+1, checkNotNull(endParen)-1, context)
@@ -147,6 +155,7 @@ fun tApl(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
         // Ex.: t = '( Nat -> Nat ) -> Nat' and u = '( Nat -> Nat )'
         // if t starts with '( Nat -> Nat )', then return '( Nat )', cutting out '( Nat -> Nat ) ->' and adding '( '
         if (t.startsWith(u.substring(0, u.length-1))){
+            println("...$t...$u...")
             val result = "( " + t.substring(u.length+4, t.length)
 
             if (result == "( Bool )")
@@ -177,26 +186,26 @@ fun tNat(terms: List<String>, indexIni: Int, indexFin: Int): String {
     return "!"
 }
 
-fun tEhzero(terms: List<String>, indexIni: Int, indexFin: Int): String {
+fun tEhzero(/*terms: List<String>, indexIni: Int, indexFin: Int*/): String {
     return "( Nat -> Bool )"
 }
 
-fun tPred(terms: List<String>, indexIni: Int, indexFin: Int): String {
+fun tPred(/*terms: List<String>, indexIni: Int, indexFin: Int*/): String {
     return "( Nat -> Nat )"
 }
 
-fun tSuc(terms: List<String>, indexIni: Int, indexFin: Int): String {
+fun tSuc(/*terms: List<String>, indexIni: Int, indexFin: Int*/): String {
     return "( Nat -> Nat )"
 }
 
-fun tTrue(terms: List<String>, indexIni: Int, indexFin: Int): String {
+fun tTrue(indexIni: Int, indexFin: Int): String {
     if (indexFin == indexIni){
         return "Bool"
     }
     return  ("!")
 }
 
-fun tFalse(terms: List<String>, indexIni: Int, indexFin: Int): String {
+fun tFalse(indexIni: Int, indexFin: Int): String {
     if (indexFin == indexIni) {
         return "Bool"
     }
