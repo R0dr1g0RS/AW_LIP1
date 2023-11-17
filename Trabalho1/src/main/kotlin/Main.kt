@@ -248,7 +248,7 @@ fun tIf(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<
         val t2 = t(terms, pThen+1, checkNotNull(pElse)-1, context)
         val t1 = t(terms, indexIni+1, pThen -1, context)
         val t3 = t(terms, pElse+1, indexFin-1, context)
-        println("...$t1...$t2...$t3...")
+        //println("...$t1...$t2...$t3...")
         if ((t1 == "Bool") and (t2 == t3)){
             return t2
         }
