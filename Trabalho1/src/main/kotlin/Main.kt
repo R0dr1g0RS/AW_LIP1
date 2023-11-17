@@ -2,7 +2,7 @@ import kotlin.system.exitProcess
 data class Context(val box: String, val type: String)
 
 fun t (terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<Context>?): String {
-
+    //println("ping")
     if (indexFin >= indexIni) {
         //println(indexIni.toString() + " -> " + terms[indexIni])
         val result = when (terms[indexIni]) {
@@ -10,6 +10,7 @@ fun t (terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<C
             "false" -> tFalse(indexIni, indexFin)
             "if" -> {
                 val endif = findPairs(terms, indexIni, indexFin, "if", "endif")
+                //println(endif)
                 if (endif != null) {
                     tIf(terms, indexIni, endif, context)
                 } else {
@@ -189,10 +190,10 @@ fun tNat(terms: List<String>, indexIni: Int, indexFin: Int): String {
 
 fun tEhzero(terms: List<String>, indexIni: Int, indexFin: Int): String {
     if (indexFin == indexIni)
-        return "( Nat -> Nat )"
+        return "( Nat -> Bool )"
     try {
         if (terms[indexIni - 1] == "(")
-            return "( Nat -> Nat )"
+            return "( Nat -> Bool )"
         return ("!")
     } catch (ex: Exception) {
         //println("T_Suc - Another Exception: ${ex.message}")
@@ -247,7 +248,7 @@ fun tIf(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<
         val t2 = t(terms, pThen+1, checkNotNull(pElse)-1, context)
         val t1 = t(terms, indexIni+1, pThen -1, context)
         val t3 = t(terms, pElse+1, indexFin-1, context)
-
+        println("...$t1...$t2...$t3...")
         if ((t1 == "Bool") and (t2 == t3)){
             return t2
         }
@@ -310,6 +311,7 @@ fun main() {
         //println("Digite: ")
         val input = readlnOrNull()
         //val input = "( lambda x : ( Nat -> Nat ) . ( lambda x : Nat . x end ( x 1 ) ) end pred )"
+        //val input = "lambda f : Nat . if ( ehzero f ) then ( suc f ) else ( pred f ) endif end"
         //println(input)
         val term = input?.split(" ")
         val gama: MutableList<Context>? = null
