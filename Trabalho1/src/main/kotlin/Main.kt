@@ -8,16 +8,7 @@ fun t (terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<C
         val result = when (terms[indexIni]) {
             "true" -> tTrue(indexIni, indexFin)
             "false" -> tFalse(indexIni, indexFin)
-            "if" -> {
-                val endif = findPairs(terms, indexIni, indexFin, "if", "endif")
-                //println(endif)
-                if (endif != null) {
-                    tIf(terms, indexIni, endif, context)
-                } else {
-                    "!"
-                }
-            }
-
+            "if" -> tIf(terms, indexIni, indexFin, context)
             "suc" -> tSuc(terms, indexIni, indexFin)
             "pred" -> tPred(terms, indexIni, indexFin)
             "ehzero" -> tEhzero(terms, indexIni, indexFin)
@@ -32,8 +23,8 @@ fun t (terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<C
                     tVar(terms, indexIni, context)
                 }
         }
-        if (result == "!") {
-            println("!")
+        if ((result == "!") || (result == "-")) {
+            println(result)
             @Suppress("UNREACHABLE_CODE")
             return exitProcess(0)
         }
@@ -44,6 +35,7 @@ fun t (terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<C
 }
 
 fun tVar(terms: List<String>, indexIni: Int, context: MutableList<Context>?): String {
+    val values = listOf("if", "endif", "else", "then", "lambda", "end")
     if (context != null) {
         //println("CONTEXTO:")
         for (i in context.size-1 downTo 0 ) {
@@ -52,28 +44,36 @@ fun tVar(terms: List<String>, indexIni: Int, context: MutableList<Context>?): St
             if(terms[indexIni] == context[i].box)
                 return context[i].type
         }
-        println("-")
-        @Suppress("UNREACHABLE_CODE")
-        return exitProcess(0)
+        return ("-")
+        //@Suppress("UNREACHABLE_CODE")
+        //return exitProcess(0)
 
-    } else {
-        println("-")
-        @Suppress("UNREACHABLE_CODE")
-        return exitProcess(0)
     }
+
+    if (terms[indexIni] in values) {
+        return ("!")
+    }
+    return ("-")
+    //@Suppress("UNREACHABLE_CODE")
+    //return exitProcess(0)
+
 }
 
 fun tAbs(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<Context>?): String {
-    val endLambda = findPairs(terms, indexIni, indexFin, "lambda", "end")
-    //println(endLambda)
-    var gama = context
-
-    // if the variable starts with a number
-    val varia = terms[indexIni+1].substring(0,1)
-    if (varia.toIntOrNull() != null)
+    if (terms[indexFin] != "end" ){
         return "!"
-
+    }
     try {
+        //val endLambda = findPairs(terms, indexIni, indexFin, "lambda", "end")
+        //println(endLambda)
+        var gama = context
+
+        // if the variable starts with a number
+        val varia = terms[indexIni+1].substring(0,1)
+        if (varia.toIntOrNull() != null)
+            return "!"
+
+
         val endType = findPairs(terms, indexIni, indexFin, "lambda", ".")
         //println(endType)
         var xU = ""
@@ -95,7 +95,7 @@ fun tAbs(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
             gama.add(c)
         }
         //println(endType)
-        val t = t(terms, endType+1, checkNotNull(endLambda)-1, gama)
+        val t = t(terms, endType+1, indexFin-1, gama)
         gama.remove(c)
 
         //println("( $xU -> $t )")
@@ -115,12 +115,32 @@ fun tApl(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
     val endParen = findPairs(terms, indexIni, indexFin, "(", ")")
     try {
         //println(checkNotNull(endParen))
-        val t = t(terms, indexIni+1, checkNotNull(endParen)-1, context)
-        //println("Apl: "+ (indexIni+1).toString() + " - " + t)
+        val t = when (terms[indexIni+1]) {
+            "(" -> {
+                val closeT = findPairs(terms, indexIni + 1, indexFin - 1, "(", ")")
+                t(terms, indexIni + 1, checkNotNull(closeT), context)
+            }
+
+            "if" -> {
+                val closeT = findPairs(terms, indexIni + 1, indexFin - 1, "if", "endif")
+                t(terms, indexIni + 1, checkNotNull(closeT), context)
+            }
+
+            "lambda" -> {
+                val closeT = findPairs(terms, indexIni + 1, indexFin - 1, "lambda", "end")
+                t(terms, indexIni + 1, checkNotNull(closeT), context)
+            }
+
+            else -> {
+                //println(indexFin.toString()+" Apl" + terms[indexFin])
+                //println(terms[indexFin-1])
+                t(terms, indexIni + 1, indexIni + 1, context)
+            }
+        }
         val u = when (terms[indexFin-1]){
             ")" -> {
                 val startU = findPairs(terms, indexFin - 1, indexIni + 1, ")", "(")
-                tApl(terms, checkNotNull(startU), indexFin-1, context)
+                t(terms, checkNotNull(startU), indexFin-1, context)
             }
             "endif" -> {
                 val startU = findPairs(terms, indexFin - 1, indexIni + 1, "endif", "if")
@@ -167,8 +187,8 @@ fun tApl(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList
 
             return (result)
         }
-        //println("erro no startswith")
-        return "!"
+
+        return "-"
 
     } catch (ex: NullPointerException) {
         //println("T_Apl - NullPointer Exception: ${ex.message}")
@@ -242,25 +262,32 @@ fun tFalse(indexIni: Int, indexFin: Int): String {
 }
 
 fun tIf(terms: List<String>, indexIni: Int, indexFin: Int, context: MutableList<Context>?): String {
-    try {
-        val pThen = findPairs(terms, indexIni, indexFin, "if", "then")
-        val pElse = findPairs(terms, checkNotNull(pThen), indexFin, "then", "else")
-        val t2 = t(terms, pThen+1, checkNotNull(pElse)-1, context)
-        val t1 = t(terms, indexIni+1, pThen -1, context)
-        val t3 = t(terms, pElse+1, indexFin-1, context)
-        //println("...$t1...$t2...$t3...")
-        if ((t1 == "Bool") and (t2 == t3)){
-            return t2
-        }
-
+    val endif = findPairs(terms, indexIni, indexFin, "if", "endif")
+    //println(endif)
+    if ((endif == null) || (endif != indexFin)){
         return "!"
+    } else {
+        try {
+            val pThen = findPairs(terms, indexIni, indexFin, "if", "then")
+            checkNotNull(pThen)
+            val pElse = findPairs(terms, pThen, indexFin, "then", "else")
+            val t2 = t(terms, pThen.plus(1), checkNotNull(pElse) - 1, context)
+            val t1 = t(terms, indexIni + 1, pThen.minus(1), context)
+            val t3 = t(terms, pElse + 1, indexFin - 1, context)
+            //println("...$t1...$t2...$t3...")
+            if ((t1 == "Bool") and (t2 == t3)) {
+                return t2
+            }
 
-    } catch (ex: NullPointerException) {
-        //println("T_If - NullPointer Exception: ${ex.message}")
-        return ("!")
-    } catch (ex: Exception) {
-        //println("T_If - Another Exception: ${ex.message}")
-        return ("!")
+            return "!"
+
+        } catch (ex: NullPointerException) {
+            //println("T_If - NullPointer Exception: ${ex.message}")
+            return ("!")
+        } catch (ex: Exception) {
+            //println("T_If - Another Exception: ${ex.message}")
+            return ("!")
+        }
     }
 }
 
@@ -309,13 +336,14 @@ fun findPairs (terms: List<String>, indexIni: Int, indexFin: Int, iniE: String, 
 fun main() {
     try {
         //println("Digite: ")
-        val input = readlnOrNull()
+        val input: String? = readLine()
         //val input = "( lambda x : ( Nat -> Nat ) . ( lambda x : Nat . x end ( x 1 ) ) end pred )"
         //val input = "lambda f : Nat . if ( ehzero f ) then ( suc f ) else ( pred f ) endif end"
         //println(input)
         val term = input?.split(" ")
         val gama: MutableList<Context>? = null
-        println(term?.let { t(it, 0, term.size - 1, gama) })
+        val result = t((term ?: listOf("Error")), 0, (term?.size ?: 0) -1, gama)
+        println(result)
     } catch (ex: NullPointerException) {
         //println("T_Apl - NullPointer Exception: ${ex.message}")
         println("!")
